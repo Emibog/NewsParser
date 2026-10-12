@@ -1,0 +1,16 @@
+# Сборка и временные файлы
+bin/
+obj/
+
+#Файлы сохранений
+SyncAppSaves/
+
+# Пользовательские настройки IDE
+.vscode/
+.idea/
+*.user
+*.userosscache
+*.sln.docstates
+
+# Логи и кэш
+*.log
