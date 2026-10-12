@@ -8,6 +8,7 @@ public class NewsWorker : BackgroundService
     private readonly ILogger<NewsWorker> _logger;
     private readonly NewsParser _parser;
     private readonly NewsRepository _repository;
+    private readonly NewsFilter _filter;
 
     public NewsWorker(ILogger<NewsWorker> logger, IConfiguration config)
     {
@@ -15,6 +16,7 @@ public class NewsWorker : BackgroundService
         _logger = logger;
         _parser = new NewsParser();
         _repository = new NewsRepository();
+        _filter = new NewsFilter(_config);
 
 
     }
@@ -38,7 +40,9 @@ public class NewsWorker : BackgroundService
 
                     if(!_repository.HasBeenSeen(hash))
                     {
-                        _logger.LogInformation($"Найдена новая новость: {news.Title}  {news.Link}");
+                        
+                        if(_filter.IsRelevant(news))
+                            _logger.LogInformation($"Найдена новая новость: {news.Title}  {news.Link}");
 
                         _repository.MarkAsSeen(hash);
                     }

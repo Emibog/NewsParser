@@ -24,7 +24,7 @@ public class NewsParser
                 newsItems.Add(new NewsItem
                 {
                     Title = item.Title.Text,
-                    Link = item.Summary.Text , //item.Links.FirstOrDefault()?.Uri.ToString() ?? "",
+                    Link = item.Links.FirstOrDefault()?.Uri.ToString() ?? "",
                     PublishDate = item.PublishDate
                 });
             }

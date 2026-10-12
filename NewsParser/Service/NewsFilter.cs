@@ -19,9 +19,21 @@ public class NewsFilter
         if(_keywords.Count < 1)
             return true;
 
+        if(IsContainsKeyword(news))
+            return true;
         
         
         return false;
+    }
+
+    private bool IsContainsKeyword(NewsItem news)
+    {
+        string text = $"{news.Title} + {news.Link}";
+
+        return _keywords.Any(kw =>
+            !string.IsNullOrWhiteSpace(kw) &&
+            text.Contains(kw, _comparison));
+
     }
 
     private bool IsStopWord(NewsItem news)
