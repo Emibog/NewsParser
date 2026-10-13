@@ -26,6 +26,22 @@ public class NewsFilter
         return false;
     }
 
+    public string? GetMatchedKeyword(NewsItem news)
+    {
+        string text = $"{news.Title} + {news.Link}";
+        
+        if(_keywords.Count < 1)
+            return null;
+        
+        foreach(string keyword in _keywords)
+        {
+            if(text.Contains(keyword, _comparison))
+                return keyword;
+        }
+
+        return null;
+    }
+
     private bool IsContainsKeyword(NewsItem news)
     {
         string text = $"{news.Title} + {news.Link}";

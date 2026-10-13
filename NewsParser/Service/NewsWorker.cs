@@ -9,6 +9,7 @@ public class NewsWorker : BackgroundService
     private readonly NewsParser _parser;
     private readonly NewsRepository _repository;
     private readonly NewsFilter _filter;
+    private readonly TelegramNotifier _notifier;
 
     public NewsWorker(ILogger<NewsWorker> logger, IConfiguration config)
     {
@@ -17,6 +18,7 @@ public class NewsWorker : BackgroundService
         _parser = new NewsParser();
         _repository = new NewsRepository();
         _filter = new NewsFilter(_config);
+        _notifier = new TelegramNotifier(config["TelegramSettings:BotToken"]!, long.Parse(config["TelegramSettings:ChatId"]!));
 
 
     }
@@ -40,9 +42,19 @@ public class NewsWorker : BackgroundService
 
                     if(!_repository.HasBeenSeen(hash))
                     {
-                        
                         if(_filter.IsRelevant(news))
-                            _logger.LogInformation($"Найдена новая новость: {news.Title}  {news.Link}");
+                        {
+                            string? keyword = _filter.GetMatchedKeyword(news);
+                            string? theme = string.Empty;
+
+                            if(keyword != null)
+                            {
+                                theme = $" по теме '{keyword}'";
+                            }
+                            
+                            _logger.LogInformation($"Найдена новая новость{theme}: {news.Title}  {news.Link}");
+                            await _notifier.SendMessage(news, theme);
+                        }
 
                         _repository.MarkAsSeen(hash);
                     }
