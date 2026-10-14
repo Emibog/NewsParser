@@ -25,44 +25,58 @@ public class NewsWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        int delay = int.Parse(_config["NewsSettings:CheckIntervalMinutes"] ?? "5");
-        List<string> feedUrls = _config.GetSection("NewsSettings:FeedUrls").Get<List<string>>() ?? throw new InvalidOperationException("Не задан список FeedUrls в appsettings.json");
-
-        while (!stoppingToken.IsCancellationRequested)
+        try
         {
-            _logger.LogInformation("Начинаю проверку новостей...");
-            
-            foreach(string feedUrl in feedUrls)
+            int delay = int.Parse(_config["NewsSettings:CheckIntervalMinutes"] ?? "5");
+            List<string> feedUrls = _config.GetSection("NewsSettings:FeedUrls").Get<List<string>>() ?? throw new InvalidOperationException("Не задан список FeedUrls в appsettings.json");
+
+            while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation($"Поиск в {feedUrl}");
-                List<NewsItem> newsItems = await _parser.ParseRssFeedAsync(feedUrl);
-
-                foreach(NewsItem news in newsItems)
+                _logger.LogInformation("Начинаю проверку новостей...");
+                
+                foreach(string feedUrl in feedUrls)
                 {
-                    var hash = news.GetHash();
+                    _logger.LogInformation($"Поиск в {feedUrl}");
+                    List<NewsItem> newsItems = await _parser.ParseRssFeedAsync(feedUrl);
 
-                    if(!_repository.HasBeenSeen(hash))
+                    foreach(NewsItem news in newsItems)
                     {
-                        if(_filter.IsRelevant(news, feedUrl))
+                        var hash = news.GetHash();
+
+                        if(!_repository.HasBeenSeen(hash))
                         {
-                            string? keyword = _filter.GetMatchedKeyword(news);
-                            string? theme = string.Empty;
-
-                            if(keyword != null)
+                            if(_filter.IsRelevant(news, feedUrl))
                             {
-                                theme = $" по теме '{keyword}'";
-                            }
-                            
-                            _logger.LogInformation($"Найдена новая новость{theme}: {news.Title}  {news.Link}");
-                            //await _notifier.SendMessage(news, theme);
-                        }
+                                string theme = GetThemeWithKeyword(news);
 
-                        _repository.MarkAsSeen(hash);
+                                _logger.LogInformation($"Найдена новая новость{theme}: {news.Title}  {news.Link}");
+                                await _notifier.SendMessage(news, theme);
+                            }
+
+                            _repository.MarkAsSeen(hash);
+                        }
                     }
-                }
-            }    
+                }   
+                _logger.LogInformation($"Все ссылки просмотрены. Ожидание {delay} минут...");
+                await Task.Delay(TimeSpan.FromMinutes(delay), stoppingToken); 
+            }
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError($"Ошибка парсинга {ex}");
+        }
+    }
+
+    private string GetThemeWithKeyword(NewsItem news)
+    {
+        string? keyword = _filter.GetMatchedKeyword(news);
+        string? theme = string.Empty;
+
+        if (keyword != null)
+        {
+            theme = $" по теме '{keyword}'";
         }
 
-        await Task.Delay(TimeSpan.FromSeconds(delay), stoppingToken);
+        return theme;
     }
 }
