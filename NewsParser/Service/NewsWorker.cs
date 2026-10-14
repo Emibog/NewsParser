@@ -34,6 +34,7 @@ public class NewsWorker : BackgroundService
             
             foreach(string feedUrl in feedUrls)
             {
+                _logger.LogInformation($"Поиск в {feedUrl}");
                 List<NewsItem> newsItems = await _parser.ParseRssFeedAsync(feedUrl);
 
                 foreach(NewsItem news in newsItems)
@@ -42,7 +43,7 @@ public class NewsWorker : BackgroundService
 
                     if(!_repository.HasBeenSeen(hash))
                     {
-                        if(_filter.IsRelevant(news))
+                        if(_filter.IsRelevant(news, feedUrl))
                         {
                             string? keyword = _filter.GetMatchedKeyword(news);
                             string? theme = string.Empty;
@@ -53,7 +54,7 @@ public class NewsWorker : BackgroundService
                             }
                             
                             _logger.LogInformation($"Найдена новая новость{theme}: {news.Title}  {news.Link}");
-                            await _notifier.SendMessage(news, theme);
+                            //await _notifier.SendMessage(news, theme);
                         }
 
                         _repository.MarkAsSeen(hash);

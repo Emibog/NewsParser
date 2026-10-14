@@ -4,17 +4,22 @@ public class NewsFilter
 {
     private readonly List<string> _keywords;
     private readonly List<string> _stopwords;
+    private readonly List<string> _urlsForAllNews;
     private readonly StringComparison _comparison = StringComparison.OrdinalIgnoreCase;
     public NewsFilter(IConfiguration config)
     {
         _keywords = config.GetSection("NewsSettings:Keywords").Get<List<string>>() ?? new List<string>();
         _stopwords = config.GetSection("NewsSettings:StopWords").Get<List<string>>() ?? new List<string>();
+        _urlsForAllNews = config.GetSection("NewsSettings:FeedUrlsForAllNews").Get<List<string>>() ?? new List<string>();
     }
 
-    public bool IsRelevant(NewsItem news)
+    public bool IsRelevant(NewsItem news, string url)
     {
         if(IsStopWord(news))
             return false;
+
+        if(IsUrlForAllNews(url))
+            return true;
             
         if(_keywords.Count < 1)
             return true;
@@ -40,6 +45,17 @@ public class NewsFilter
         }
 
         return null;
+    }
+
+    private bool IsUrlForAllNews(string curretnUrl)
+    {
+        foreach(string url in _urlsForAllNews)
+        {
+            if(curretnUrl == url)
+                return true;
+        }
+
+        return false;
     }
 
     private bool IsContainsKeyword(NewsItem news)
