@@ -1,9 +1,9 @@
-# 📰 NewsParser - Telegram Бот для Парсинга Новостей
+# 📰 NewsParser - Бот для парсинга новостей и отправки сообщений в Telegram
 
 [![.NET](https://img.shields.io/badge/.NET-10.0-blue.svg)](https://dotnet.microsoft.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**NewsParser** — это автоматизированный бот для Telegram, который мониторит RSS-ленты новостных сайтов и отправляет вам только релевантные новости в выбранный чат.
+**NewsParser** — это автоматизированный бот, который мониторит RSS-ленты новостных сайтов и отправляет вам только релевантные новости в выбранный чат в Telegram.
 
 ## ✨ Основные возможности
 
