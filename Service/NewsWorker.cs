@@ -50,7 +50,7 @@ public class NewsWorker : BackgroundService
                                 string theme = GetThemeWithKeyword(news);
 
                                 _logger.LogInformation($"Найдена новая новость{theme}: {news.Title}  {news.Link}");
-                                await _notifier.SendMessage(news, theme);
+                                //await _notifier.SendMessage(news, theme);
                             }
 
                             _repository.MarkAsSeen(hash);

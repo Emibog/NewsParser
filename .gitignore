@@ -2,9 +2,6 @@
 bin/
 obj/
 
-#Файлы сохранений
-SyncAppSaves/
-
 # Пользовательские настройки IDE
 .vscode/
 .idea/
@@ -14,3 +11,6 @@ SyncAppSaves/
 
 # Логи и кэш
 *.log
+
+# База данных SQLite
+*.db
